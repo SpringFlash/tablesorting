@@ -29,10 +29,11 @@ function sorts(btn, sorting) {
 
 btn1.onclick = function name_sort() {  // btn 1
 	let sorting = function(a, b) {
-	if (a.children[0].innerHTML[0] < b.children[0].innerHTML[0])
-		return (-1);
-	else
-		return (1);
+		if (a.children[0].innerHTML < b.children[0].innerHTML)
+			return (-1);
+		
+		else
+			return (1);
 	};
 
 	let ch = sorts(btn1, sorting);

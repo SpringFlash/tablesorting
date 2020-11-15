@@ -72,3 +72,11 @@ p {
 	font-size: 14px;
 	color: #ed3532;
 }
+
+.sorted[data-order = "1"]::after {
+	content: ' ▲';
+}
+
+.sorted[data-order = "-1"]::after {
+	content: ' ▼';
+}

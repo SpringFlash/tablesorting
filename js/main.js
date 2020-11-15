@@ -1,64 +1,106 @@
-function push_html() {
-	for (let el of tableRows) {
-		mainTable.appendChild(el);
+const first_table = new Table('.wrapper table');
+
+const new_table = new Table().init({
+	'root': '#table-cont',
+	'headers': [
+		{
+			'label': '№',
+			'sortable': false,
+		},
+		{
+			'key': 'state',
+			'label': 'Штат'
+		},
+		{
+			'key': 'count',
+			'label': 'Количество выборщиков'
+		},
+		{
+			'key': 'date',
+			'label': 'Дата принятия',
+		}
+	]
+});
+
+new_table.createRows([
+	{
+		'state': 'Мэриленд',
+		'count': '10',
+		'date': '10.04.2007'
+	},
+	{
+		'state': 'Нью-Джерси',
+		'count': '14',
+		'date': '13.01.2008'
+	},
+	{
+		'state': 'Иллинойс',
+		'count': '20',
+		'date': '7.04.2008'
+	},
+	{
+		'state': 'Гавайи',
+		'count': '4',
+		'date': '1.05.2008'
+	},
+	{
+		'state': 'Вашингтон',
+		'count': '12',
+		'date': '28.04.2009'
+	},
+	{
+		'state': 'Массачусетс',
+		'count': '11',
+		'date': '4.08.2010'
+	},
+	{
+		'state': 'Округ Колумбия',
+		'count': '3',
+		'date': '7.12.2011'
+	},
+	{
+		'state': 'Вермонт',
+		'count': '3',
+		'date': '22.04.2011'
+	},
+	{
+		'state': 'Калифорния',
+		'count': '55',
+		'date': '8.06.2011'
+	},
+	{
+		'state': 'Род Айленд',
+		'count': '4',
+		'date': '12.07.13'
+	},
+	{
+		'state': 'Нью-Йорк',
+		'count': '29',
+		'date': '15.04.2014'
+	},
+	{
+		'state': 'Коннектикут',
+		'count': '7',
+		'date': '24.05.2018'
+	},
+	{
+		'state': 'Колорадо',
+		'count': '9',
+		'date': '15.04.2019'
+	},
+	{
+		'state': 'Делавэр',
+		'count': '3',
+		'date': '28.04.2019'
+	},
+	{
+		'state': 'Нью-Мексико',
+		'count': '5',
+		'date': '3.04.2019'
+	},
+	{
+		'state': 'Орегон',
+		'count': '7',
+		'date': '12.06.2019'
 	}
-}
-
-function btn_names(btn, ch) {
-	btn1.innerHTML = "Товар";
-	btn2.innerHTML = "Количество";
-	btn3.innerHTML = "Цена/1";
-
-	btn.innerHTML += " " + ch;
-}
-
-function sorts(btn, sorting) {
-	let is_sorted = Boolean(btn.innerHTML.indexOf("▼") + 1);
-	let ch;
-	if (is_sorted) {
-		tableRows.sort((a, b) => sorting(a, b));
-		ch = "▲";
-	} else {
-		tableRows.sort((b, a) => sorting(a, b));
-		ch = "▼";
-	}
-	push_html();
-	return ch;
-}
-
-
-btn1.onclick = function name_sort() {  // btn 1
-	let sorting = function(a, b) {
-		if (a.children[0].innerHTML < b.children[0].innerHTML)
-			return (-1);
-		
-		else
-			return (1);
-	};
-
-	let ch = sorts(btn1, sorting);
-	btn_names(btn1, ch);
-}
-
-
-btn2.onclick = function count_sort() {  // btn 2
-	let sorting = (a, b) => (a.children[1].innerHTML - b.children[1].innerHTML);
-	
-	let ch = sorts(btn2, sorting);
-	btn_names(btn2, ch);
-}
-
-btn3.onclick = function price_sort() {  // btn 3	
-	let sorting = (a, b) => (a.children[2].innerHTML - b.children[2].innerHTML);
-	
-	let ch = sorts(btn3, sorting);
-	btn_names(btn3, ch);
-}
-
-
-let mainTable = document.getElementsByTagName('tbody')[0];
-let tableRows = [];
-
-for (let el of mainTable.children) {
-	tableRows.push(el);
-}
+]);

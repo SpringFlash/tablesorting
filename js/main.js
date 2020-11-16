@@ -1,4 +1,4 @@
-const first_table = new Table('.wrapper table');
+const first_tables = Table.parseAll('.wrapper table');
 
 const new_table = new Table().init({
 	'root': '#table-cont',

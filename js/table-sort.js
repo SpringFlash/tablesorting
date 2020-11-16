@@ -52,29 +52,7 @@ class Table {
 	
 	constructor(html_table) { // парсинг существующей таблицы
 		if (html_table != null) {
-			this.table = document.querySelector(html_table);
-			const headers = this.table.querySelectorAll("th");
-			this.tbody = this.table.tBodies[0];
-			const rows = this.tbody.rows;
-
-			for (let th of headers) {
-				const header = {
-					'caption': th.innerHTML,
-					'element': th
-				};
-				
-				this.headers.push(header);
-				th.addEventListener('click', () => this.#sort(header));
-			}
-
-			for (let i = 0; i < rows.length ; i++) {
-				this.rows.push(rows[i]);
-				for (let j = 0; j < this.headers.length; j++) {
-					const el = rows[i].children[j];
-	
-					el.innerHTML = this.#isDate(el.innerHTML, el, this.headers[j]);
-				}
-			}
+			this.parse(document.querySelector(html_table));
 		}
 	}
 
@@ -85,7 +63,7 @@ class Table {
 		this.table = document.createElement("table");
 		let thead = document.createElement("thead");
 		this.tbody = document.createElement("tbody");
-		
+
 		for (let header of headers) {
 			const {key, label, sortable = true} = header;
 			let th = document.createElement("th");
@@ -97,9 +75,10 @@ class Table {
 				th.dataset.index = 0;
 			}
 
-			if (sortable)
+			if (sortable) {
+				th.classList.toggle('sortable');
 				th.addEventListener('click', () => this.#sort(header));
-
+			}
 			thead.append(th);
 		}
 
@@ -140,4 +119,44 @@ class Table {
 			this.tbody.append(tr);
 		}
 	}	
+
+	parse(table) {
+		this.table = table;
+		const headers = table.querySelectorAll("th");
+		this.tbody = table.tBodies[0];
+		const rows = this.tbody.rows;
+
+		for (let th of headers) {
+			const header = {
+				'caption': th.innerHTML,
+				'element': th
+			};
+			
+			this.headers.push(header);
+			th.classList.toggle('sortable');
+			th.addEventListener('click', () => this.#sort(header));
+		}
+
+		for (let i = 0; i < rows.length ; i++) {
+			this.rows.push(rows[i]);
+			for (let j = 0; j < this.headers.length; j++) {
+				const el = rows[i].children[j];
+
+				el.innerHTML = this.#isDate(el.innerHTML, el, this.headers[j]);
+			}
+		}
+	}
+
+	static parseAll(qSelector) {
+		const querries = document.querySelectorAll(qSelector);
+		let tables = [];
+
+		for (let selector of querries) {
+			let result_table = new this();
+			result_table.parse(selector);
+			tables.push(result_table);
+		}
+		
+		return tables;
+	}
 }

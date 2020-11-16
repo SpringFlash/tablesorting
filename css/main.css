@@ -16,12 +16,11 @@ th {
 	text-shadow: 0 1px 1px #2D2020;
 	padding: 10px 20px;
 	background: #ed8032;
-	cursor: pointer;
 }
 
 td {
-padding: 10px 20px;
-background: #F8E391;
+	padding: 10px 20px;
+	background: #F8E391;
 }
 
 th, td {
@@ -71,6 +70,10 @@ p {
 .marked {
 	font-size: 14px;
 	color: #ed3532;
+}
+
+.sortable {
+	cursor: pointer;
 }
 
 .sorted[data-order = "1"]::after {

@@ -71,7 +71,7 @@ new_table.createRows([
 	{
 		'state': 'Род Айленд',
 		'count': '4',
-		'date': '12.07.13'
+		'date': '12.07.2013'
 	},
 	{
 		'state': 'Нью-Йорк',

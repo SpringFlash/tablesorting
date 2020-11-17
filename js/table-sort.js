@@ -133,8 +133,10 @@ class Table {
 			};
 			
 			this.headers.push(header);
-			th.classList.toggle('sortable');
-			th.addEventListener('click', () => this.#sort(header));
+			if (!th.classList.contains('unsortable')) {
+				th.classList.add('sortable');
+				th.addEventListener('click', () => this.#sort(header));
+			}
 		}
 
 		for (let i = 0; i < rows.length ; i++) {

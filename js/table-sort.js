@@ -1,17 +1,19 @@
 class Table {
 	
 	rows = [];
-	headers = [];
+	#renderfuncs = {};
 
 	// --------- private ----------
 
-	#sort(header) { // функция сортировки
-		const index = this.headers.indexOf(header);
-		const order = (header.element.dataset.order = -(header.element.dataset.order || -1));
+	#sort(event) { // функция сортировки
+
+		const index = [...event.target.parentElement.children].indexOf(event.target);
+		//const index = this.headers.indexOf(header);
+		const order = (event.target.dataset.order = -(event.target.dataset.order || -1));
 		const collator = new Intl.Collator(['en', 'ru'], { numeric: true, });
-		let sorting;
 		
-		if (header.type == 'date') {
+		let sorting;
+		if (event.target.getAttribute('type') == 'date') {
 			sorting = (a, b) => order * collator.compare(
 				a.children[index].dataset.ms,
 				b.children[index].dataset.ms
@@ -23,14 +25,14 @@ class Table {
 			);
 		}
 
-		this.table.append(...[...this.rows].sort((a, b) => sorting(a, b)));
+		this.table.tBodies[0].append(...this.rows.sort((a, b) => sorting(a, b)));
 
-		for(const {element} of this.headers)
-			element.classList.toggle('sorted', element === header.element);
+		for(const el of [...event.target.parentElement.children])
+			el.classList.toggle('sorted', el === event.target);
 	}
 
 
-	#isDate(val, td, header) { // проверка - является ли значение датой
+	#isDate(val, td, th) { // проверка - является ли значение датой
 		if (val.split('.').length == 3){
 			val = val.split('.')[2] + '-' + val.split('.')[1] + '-' + val.split('.')[0]; 
 		}
@@ -42,7 +44,7 @@ class Table {
 				day: "numeric"
 			});
 			const date = Date.parse(val);
-			header.type = 'date';
+			th.setAttribute('type', 'date');
 			td.dataset.ms = date;
 			return formatter.format(date);
 		} else return val;
@@ -56,106 +58,153 @@ class Table {
 		}
 	}
 
-	init({root, headers}) { // создать новую таблицу
-		this.table_root = document.querySelector(root)
-		this.headers = headers;
+	init({root, editable=false, headers}) { // создать новую таблицу
+		const table_root = document.querySelector(root)
 
 		this.table = document.createElement("table");
-		let thead = document.createElement("thead");
-		this.tbody = document.createElement("tbody");
+		const thead = document.createElement("thead");
+		const tbody = document.createElement("tbody");
 
-		for (let header of headers) {
-			const {key, label, sortable = true} = header;
+		const headers_row = document.createElement("tr");
+		headers.forEach((header, index) => {
+			const {key, label, render, sortable = true} = header;
 			let th = document.createElement("th");
 			th.innerHTML = label;
-			header['element'] = th;
 			
-			if (!key)  {
-				header.type = 'autoincrement';
+			if (render) {
+				th.setAttribute('type', 'rendering');
+				this.#renderfuncs[index] = render;
+			} else if (!key) {
+				th.setAttribute('type', 'autoincrement');
 				th.dataset.index = 0;
+			} else {
+				th.dataset.key = key;
 			}
 
 			if (sortable) {
 				th.classList.toggle('sortable');
-				th.addEventListener('click', () => this.#sort(header));
+				th.addEventListener('click', event => this.#sort(event));
 			}
-			thead.append(th);
+			headers_row.append(th);
+		});
+		
+		
+		thead.append(headers_row);
+		this.table.append(thead, tbody);
+		if (editable) {
+			new InputTable(this);
 		}
 
-		this.table.append(thead);
-		this.table.append(this.tbody);
-
-		this.table_root.append(this.table);
+		table_root.append(this.table);
 		return this;
 	}
 
 	createRows(rows) { // добавить строки в таблицу
 		for (let row of rows) {
 			let tr = document.createElement("tr");
+			const thead = this.table.tHead.children[0].children;
 			
-			let row_elements = new Array(this.headers.length);
-			for (let i = 0; i < this.headers.length; i++) {
-				if (this.headers[i].type == 'autoincrement') {
-					row_elements[i] = Number(this.headers[i].element.dataset.index) + 1;
-					this.headers[i].element.dataset.index = row_elements[i];
+			
+			let row_elements = new Array(thead.length);
+			for (let i = 0; i < thead.length; i++) {
+				const type = thead[i].getAttribute('type');
+				if (type == 'autoincrement') {
+					row_elements[i] = Number(thead[i].dataset.index) + 1;
+					thead[i].dataset.index = row_elements[i]; 
+				} else if (type == 'rendering') {
+					row_elements[i] = this.#renderfuncs[i](row_elements);
 				} else {
 					for (let key in row) {
-						if (key === this.headers[i].key)
-							row_elements[i] = row[key];
+						if (key == thead[i].dataset.key) row_elements[i] = row[key];
 					}
 				}
 			}
+			
 
-			for (let el of row_elements) {
+			row_elements.forEach ((el, i) => {
 				let td = document.createElement("td");
-				if (!el) 
-					td.innerHTML = '-';
-				else
-					td.innerHTML = this.#isDate(String(el), td, this.headers[row_elements.indexOf(el)]);
+				if (!el) td.innerHTML = '-';
+				else td.innerHTML = this.#isDate(String(el), td, thead[i]);
 				tr.append(td);
-			}
+			});
 
 			this.rows.push(tr);
-			this.tbody.append(tr);
+			this.table.tBodies[0].append(tr);
 		}
-	}	
+	}
 
-	parse(table) {
+	editRow({where, index, edit}) {
+		const thead = this.table.tHead.children[0].children;
+
+		if (!index) {
+			if (Object.keys(where).length != 1) throw new Error('В "where" может быть только одно значение')
+			for (let i = 0; i < thead.length; i++) {
+				for (let key in where) {
+					if (key == thead[i].dataset.key) {
+						this.rows.forEach ((row, j) => {
+							if (row.children[i].innerHTML == where[key]) index = j;
+						});
+					}
+				}
+			}
+		}
+		
+		let row_elements = [];
+		if (isFinite(index)) {
+			const ed_row = this.rows[index].children;
+			for (let i = 0; i < thead.length; i++) {
+				if (thead[i].getAttribute('type') == 'rendering') {
+					row_elements[i] = this.#renderfuncs[i](row_elements);
+					ed_row[i].innerHTML = row_elements[i];
+				} else {
+					for (let key in edit) {
+						if (key == thead[i].dataset.key) {
+							row_elements[i] = edit[key];
+							ed_row[i].innerHTML = this.#isDate(String(edit[key]), ed_row[i], thead[i]);
+						}
+					}
+				}
+			}		
+			this.table.tBodies[0].append(...this.rows);
+		}
+	}
+	
+	deleteRow(ind) {
+		this.table.tBodies[0].deleteRow(ind);
+		this.rows.splice(ind, 1);
+	}
+
+	parse(table, editable = false) {
 		this.table = table;
-		const headers = table.querySelectorAll("th");
-		this.tbody = table.tBodies[0];
-		const rows = this.tbody.rows;
+		const headers = table.tHead.children[0].children
+		const tbody = table.tBodies[0];
+		const rows = tbody.rows;
 
 		for (let th of headers) {
-			const header = {
-				'caption': th.innerHTML,
-				'element': th
-			};
-			
-			this.headers.push(header);
 			if (!th.classList.contains('unsortable')) {
 				th.classList.add('sortable');
-				th.addEventListener('click', () => this.#sort(header));
+				th.addEventListener('click', event => this.#sort(event));
 			}
 		}
 
 		for (let i = 0; i < rows.length ; i++) {
 			this.rows.push(rows[i]);
-			for (let j = 0; j < this.headers.length; j++) {
+			for (let j = 0; j < headers.length; j++) {
 				const el = rows[i].children[j];
-
-				el.innerHTML = this.#isDate(el.innerHTML, el, this.headers[j]);
+				el.innerHTML = this.#isDate(el.innerHTML, el, headers[j]);
 			}
 		}
+
+		if (editable) new InputTable(this);
 	}
 
-	static parseAll(qSelector) {
+	static parseAll(qSelector, editable = false) {
 		const querries = document.querySelectorAll(qSelector);
 		let tables = [];
 
 		for (let selector of querries) {
 			let result_table = new this();
-			result_table.parse(selector);
+			result_table.parse(selector, editable);
 			tables.push(result_table);
 		}
 		

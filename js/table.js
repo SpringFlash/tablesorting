@@ -12,6 +12,7 @@ class TableN {
         this.headersRow = new RowHeader(headers, this.id);
         this.bodyContainer = new TableBody(this.id);
         this.headersLength = this.headersRow.length;
+        this.editable = editable;
         
         const {tableTag='table', rowTag='tr', headTag='thead', headerTag='th', bodyTag='tbody'} = tags;
         const table_root = document.querySelector(root);
@@ -23,7 +24,6 @@ class TableN {
                 el.on('click', () => this.sort(el, ind));
         });
 
-        this.editable = editable;
         return this;
     }
 

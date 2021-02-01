@@ -32,7 +32,6 @@ class TableBody {
 
     sort(check, table) {
         this.rows.sort((a, b) => check(a, b));
-        console.log(this.rows)
         this.rows.forEach(row => this.getElement().append(row.getElement()));
     }
 

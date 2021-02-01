@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
-	const first_tables = Table.parseAll('.tab', true);
+	// const first_tables = Table.parseAll('.tab', true);
 
-	const new_table = new Table().init({
+	const new_table = new TableN().init({
 		'root': '#table-cont',
 		'editable': true,
 		'headers': [
@@ -28,7 +28,8 @@ document.addEventListener("DOMContentLoaded", () => {
 					return result;
 				}
 			}
-		]
+		],
+		tags: {'tableTag': 'table', 'rowTag': 'tr', 'headTag': 'thead', 'headerTag': 'th', 'bodyTag': 'tbody'}
 	});
 
 	new_table.createRows([

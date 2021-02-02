@@ -39,7 +39,7 @@ class TableN {
         for (let data of rows) {
             let row = new Row(this.bodyContainer.id, this.bodyContainer.getLength());
             for (let i = 0; i < this.headersLength; i++) {
-                let value = this.headersRow.getCol(i, data, row.getValues());
+                let value = this.headersRow.getCol(i, data, row);
                 value.setId(row.id, i)
                 row.insert(value, i);
             }

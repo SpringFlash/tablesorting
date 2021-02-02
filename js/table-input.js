@@ -73,13 +73,12 @@ class InputTableN {
             let editData = [];
             edHdrs.forEach((hdr, ind) => {
                 editData[ind] = row.cols[ind].children[0].getValue();
-                //row.cols[ind].edit(editData[hdr.dataset.key]);
             });
             
             
             for (let i = 0; i < this.table.headersLength; i++) {
                 const type = this.table.headersRow.head.cols[i].attributes['type'];
-                if (type == 'rendering') row.cols[i].edit(this.table.headersRow.renderfuncs[i](row.getValues()));
+                if (type == 'rendering') row.cols[i].edit(this.table.headersRow.renderfuncs[i](row));
                 else if (type == 'autoincrement') continue;
                 else row.cols[i].edit(editData[i]);
             }

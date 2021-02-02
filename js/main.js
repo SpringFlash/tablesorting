@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			{
 				'label': 'Сумма букв',
 				'render': function(row) {
-					result = row[1].length;
+					result = row.getValues()[1].length;
 					return result;
 				}
 			}
@@ -115,5 +115,37 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 	]);
 
+	const second_tbl = new TableN().init({
+		'root': '#table2-cont',
+		'editable': true,
+		'headers': [
+			{
+				'label': '№',
+				'sortable': false,
+			},
+			{
+				'key': 'state',
+				'label': 'Имя'
+			},
+			{
+				'key': 'count',
+				'label': 'Номер дома'
+			},
+			{
+				'key': 'date',
+				'label': 'Дата рождения',
+			},
+			{
+				'label': 'Полных лет',
+				'render': function(row) {
+					const now = Date.now() - row.cols[3].dataset.ms;
+					return Math.floor(now / 31536000000);
+				}
+			}
+		],
+		tags: {'tableTag': 'table', 'rowTag': 'tr', 'headTag': 'thead', 'headerTag': 'th', 'bodyTag': 'tbody'}
+	});
 });
+
+
 
